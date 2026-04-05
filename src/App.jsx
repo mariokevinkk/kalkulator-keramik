@@ -72,9 +72,13 @@ function App() {
     localStorage.setItem('ceramic_history', JSON.stringify(updated));
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="app-container">
-      <header className="main-header">
+      <header className="main-header no-print">
         <h1 className="main-title">Kalkulator Keramik</h1>
         <button className="theme-btn" onClick={toggleTheme}>
           {theme === 'light' ? '🌙 Gelap' : '☀️ Terang'}
@@ -82,8 +86,8 @@ function App() {
       </header>
 
       <div className="main-grid">
-        {/* INPUTS */}
-        <section className="card input-card">
+        {/* INPUTS - Hidden on print */}
+        <section className="card input-card no-print">
           <div className="card-header">
             <h2 className="card-title">Ukuran Ruangan</h2>
             <select className="ui-select" value={roomUnit} onChange={(e) => setRoomUnit(e.target.value)}>
@@ -126,9 +130,10 @@ function App() {
           </div>
         </section>
 
-        {/* RESULTS */}
+        {/* RESULTS - Visible on print */}
         <section className="card result-card">
-          <h2 className="card-title">Ringkasan</h2>
+          <h2 className="card-title print-only" style={{ marginBottom: '1rem', textAlign: 'center' }}>Laporan Perhitungan Keramik</h2>
+          <h2 className="card-title no-print">Ringkasan</h2>
           <div className="big-result">
             <div className="res-label">Total Belanja</div>
             <div className="res-value">{result.totalWithWaste} <span>Pcs</span></div>
@@ -149,33 +154,34 @@ function App() {
             </div>
           </div>
           
-          <button className="primary-btn" onClick={saveToHistory}>Simpan ke Riwayat</button>
+          <div className="btn-group no-print">
+            <button className="primary-btn" onClick={saveToHistory}>Simpan Riwayat</button>
+            <button className="print-btn" onClick={handlePrint}>🖨️ Cetak Hasil</button>
+          </div>
+
+          <div className="print-info print-only">
+            <p><strong>Ruangan:</strong> {panjangRuangan} x {lebarRuangan} {roomUnit}</p>
+            <p><strong>Ukuran Keramik:</strong> {panjangKeramik} x {lebarKeramik} cm</p>
+            <p><strong>Waktu Cetak:</strong> {new Date().toLocaleString('id-ID')}</p>
+          </div>
         </section>
       </div>
 
-      {/* VISUALIZER - FULL REWRITE */}
+      {/* VISUALIZER - Visible on print */}
       <section className="card visual-card">
-        <h2 className="card-title">Visualisasi Tata Letak</h2>
+        <h2 className="card-title no-print">Visualisasi Tata Letak</h2>
         
         <div className="viz-wrapper">
           <div className="viz-frame">
-             {/* Labels */}
              <div className="label v-label-top">{result.pR} cm</div>
              <div className="label v-label-left">{result.lR} cm</div>
              
-             {/* Actual Visual Area */}
              <div className="viz-box-container">
-                <div 
-                  className="viz-box" 
-                  style={{ aspectRatio: `${result.pR}/${result.lR}` }}
-                >
-                  <div 
-                    className="viz-grid"
-                    style={{
+                <div className="viz-box" style={{ aspectRatio: `${result.pR}/${result.lR}` }}>
+                  <div className="viz-grid" style={{
                       gridTemplateColumns: `repeat(${result.tilesH}, 1fr)`,
                       gridTemplateRows: `repeat(${result.tilesV}, 1fr)`,
-                    }}
-                  >
+                    }}>
                     {[...Array(Math.min(1000, result.totalTilesLayout))].map((_, i) => {
                       const col = i % result.tilesH;
                       const row = Math.floor(i / result.tilesH);
@@ -187,7 +193,6 @@ function App() {
                 </div>
              </div>
           </div>
-          
           <div className="viz-legend">
             <div className="leg-item"><span className="leg-box utuh"></span> Keramik Utuh</div>
             {(result.hasRemainderH || result.hasRemainderV) && (
@@ -197,9 +202,9 @@ function App() {
         </div>
       </section>
 
-      {/* HISTORY */}
+      {/* HISTORY - Hidden on print */}
       {history.length > 0 && (
-        <section className="card hist-card">
+        <section className="card hist-card no-print">
           <h2 className="card-title">Riwayat Simpan</h2>
           <div className="table-row-wrap">
             <table className="hist-table">
