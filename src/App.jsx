@@ -2,11 +2,11 @@ import { useState, useMemo, useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const [panjangRuangan, setPanjangRuangan] = useState(400); 
-  const [lebarRuangan, setLebarRuangan] = useState(400);   
-  const [panjangKeramik, setPanjangKeramik] = useState(40);
-  const [lebarKeramik, setLebarKeramik] = useState(40);
-  const [wasteFactor, setWasteFactor] = useState(10); 
+  const [panjangRuangan, setPanjangRuangan] = useState('400'); 
+  const [lebarRuangan, setLebarRuangan] = useState('400');   
+  const [panjangKeramik, setPanjangKeramik] = useState('40');
+  const [lebarKeramik, setLebarKeramik] = useState('40');
+  const [wasteFactor, setWasteFactor] = useState('10'); 
   const [roomUnit, setRoomUnit] = useState('cm'); 
   const [useCadangan, setUseCadangan] = useState(false);
   const [history, setHistory] = useState([]);
@@ -27,24 +27,30 @@ function App() {
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   const result = useMemo(() => {
-    const pR = roomUnit === 'm' ? panjangRuangan * 100 : panjangRuangan;
-    const lR = roomUnit === 'm' ? lebarRuangan * 100 : lebarRuangan;
+    const numPR = Number(panjangRuangan) || 0;
+    const numLR = Number(lebarRuangan) || 0;
+    const numPK = Number(panjangKeramik) || 0;
+    const numLK = Number(lebarKeramik) || 0;
+    const numWF = Number(wasteFactor) || 0;
+
+    const pR = roomUnit === 'm' ? numPR * 100 : numPR;
+    const lR = roomUnit === 'm' ? numLR * 100 : numLR;
     
     // Safety check for zero/negative
-    if (pR <= 0 || lR <= 0 || panjangKeramik <= 0 || lebarKeramik <= 0) {
+    if (pR <= 0 || lR <= 0 || numPK <= 0 || numLK <= 0) {
       return { pR, lR, tilesH: 0, tilesV: 0, totalTilesLayout: 0, totalWithWaste: 0 };
     }
 
-    const tilesH = Math.ceil(pR / panjangKeramik);
-    const tilesV = Math.ceil(lR / lebarKeramik);
+    const tilesH = Math.ceil(pR / numPK);
+    const tilesV = Math.ceil(lR / numLK);
     const totalTilesLayout = tilesH * tilesV;
     
-    const remH = pR % panjangKeramik;
-    const remV = lR % lebarKeramik;
+    const remH = pR % numPK;
+    const remV = lR % numLK;
     const hasRemainderH = remH !== 0;
     const hasRemainderV = remV !== 0;
 
-    const actualWaste = useCadangan ? wasteFactor : 0;
+    const actualWaste = useCadangan ? numWF : 0;
     const totalWithWaste = Math.ceil(totalTilesLayout * (1 + actualWaste / 100));
     
     return {
@@ -99,11 +105,11 @@ function App() {
           <div className="form-row">
             <div className="form-group">
               <label>Sisi A ({roomUnit})</label>
-              <input type="number" value={panjangRuangan} onChange={(e) => setPanjangRuangan(Number(e.target.value))} />
+              <input type="number" value={panjangRuangan} onChange={(e) => setPanjangRuangan(e.target.value.replace(/^0+(?=\d)/, ''))} />
             </div>
             <div className="form-group">
               <label>Sisi B ({roomUnit})</label>
-              <input type="number" value={lebarRuangan} onChange={(e) => setLebarRuangan(Number(e.target.value))} />
+              <input type="number" value={lebarRuangan} onChange={(e) => setLebarRuangan(e.target.value.replace(/^0+(?=\d)/, ''))} />
             </div>
           </div>
 
@@ -111,11 +117,11 @@ function App() {
           <div className="form-row">
             <div className="form-group">
               <label>Panjang (cm)</label>
-              <input type="number" value={panjangKeramik} onChange={(e) => setPanjangKeramik(Number(e.target.value))} />
+              <input type="number" value={panjangKeramik} onChange={(e) => setPanjangKeramik(e.target.value.replace(/^0+(?=\d)/, ''))} />
             </div>
             <div className="form-group">
               <label>Lebar (cm)</label>
-              <input type="number" value={lebarKeramik} onChange={(e) => setLebarKeramik(Number(e.target.value))} />
+              <input type="number" value={lebarKeramik} onChange={(e) => setLebarKeramik(e.target.value.replace(/^0+(?=\d)/, ''))} />
             </div>
           </div>
 
@@ -125,7 +131,7 @@ function App() {
               <span>Gunakan Cadangan (%)</span>
             </label>
             {useCadangan && (
-              <input className="small-input" type="number" value={wasteFactor} onChange={(e) => setWasteFactor(Number(e.target.value))} />
+              <input className="small-input" type="number" value={wasteFactor} onChange={(e) => setWasteFactor(e.target.value.replace(/^0+(?=\d)/, ''))} />
             )}
           </div>
         </section>
